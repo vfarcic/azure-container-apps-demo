@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0",
+    "parameters": {
+        "environment": {
+            "type": "String"
+        },
+        "tag": {
+            "defaultValue": "latest",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "dot",            
+            "type": "Microsoft.Web/containerApps",
+            "apiVersion": "2021-03-01",
+            "kind": "containerapp",
+            "location": "canadacentral",
+            "properties": {
+                "kubeEnvironmentId": "[resourceId('Microsoft.Web/kubeEnvironments', parameters('environment'))]",
+                "configuration": {
+                    "ingress": {
+                        "external": true,
+                        "targetPort": 80,
+                        "allowInsecure": true
+                    }
+                },
+                "template": {
+                    "containers": [{
+                        "name": "front",
+                        "image": "vfarcic/devops-toolkit-series:[parameters('tag')]",
+                        "resources": {
+                            "cpu": 0.25,
+                            "memory": "0.5Gi"
+                        }
+                    }],
+                    "scale": {
+                        "minReplicas": 0,
+                        "maxReplicas": 25
+                    }
+                }
+            }
+        }
+    ]
+}
